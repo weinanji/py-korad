@@ -8,7 +8,13 @@ import re
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from korad import kel103_usb
+
+import sys
+import os
+# Add the korad directory to the system path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from korad.kel103_usb import kel103
+
 
 #test proporties
 cutOffVoltage = 3
@@ -16,18 +22,18 @@ dischargeRate = 0.45
 MISSED_LIMIT = 10 # amount of missed samples that is allowed
 
 # setup the device (the IP of your ethernet/wifi interface, the IP of the Korad device)
-kel = kel103_usb.kel103('COM7', 115200)
-kel.checkDevice()
+device = kel103('COM7', 115200)
+device.checkDevice()
 
 # a quick battery test
-kel.setOutput(False)        
-voltage = kel.measureVolt()
-kel.setCurrent(dischargeRate)
+device.setOutput(False)        
+voltage = device.measureVolt()
+device.setCurrent(dischargeRate)
 voltageData = []
 timeData = []
 current = 0
 capacity = 0
-kel.setOutput(True)
+device.setOutput(True)
 
 # run the test
 startTime = time.time()
@@ -37,8 +43,8 @@ missedSuccessiveSamples = 0
 while voltage > cutOffVoltage:
     try:
         # store the time before measuring volt/current
-        voltage = kel.measureVolt()
-        current = kel.measureCurrent()
+        voltage = device.measureVolt()
+        current = device.measureCurrent()
         voltageData.append(voltage)
         # Only append the timedata when volt/current measurements went fine.
         # This is because the voltage or current measurement could fail
@@ -48,9 +54,10 @@ while voltage > cutOffVoltage:
         timeData.append(time.time() - startTime)
 
         # solve the current stuff as a running accumulation
-        capacity += ((previous_time - current_time) / 60 / 60) * current
+        # capacity += ((previous_time - current_time) / 60 / 60) * current
+        capacity += ((current_time - previous_time) / 60 / 60) * current * 1000
 
-        print("Voltage: " + str(voltage) + " V DC, Capacity: " + str(capacity) + " Ah, Discharge Rate: " + str(dischargeRate) + " A")
+        print("Voltage: " + str(voltage) + " V DC, Capacity: " + str(capacity) + " mAh, Discharge Rate: " + str(dischargeRate) + " A")
         time.sleep(0.25)
         missedSuccessiveSamples = 0
     except Exception as e:
@@ -60,15 +67,15 @@ while voltage > cutOffVoltage:
             raise Exception("Too many missed samples!")
 
 # disable the output
-kel.setOutput(False)
-kel.endComm()
+device.setOutput(False)
+device.endComm()
 
 # plot the finished data
 fig, ax = plt.subplots()
 ax.plot(timeData, voltageData)
 
 ax.set(xlabel='time (s)', ylabel='voltage (V DC)',
-    title='Battery Discharge Test {}A: {:.4f}Ah'.format(dischargeRate, capacity))
+    title='Battery Discharge Test {}A: {:.4f}mAh'.format(dischargeRate, capacity))
 ax.grid()
 
 fig.savefig("test_" + str(time.time()) + ".png")

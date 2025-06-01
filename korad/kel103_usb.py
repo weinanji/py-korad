@@ -4,7 +4,6 @@ import io
 import sys
 
 class koradUSBComm(object):
-
     def __init__(self, port, baud):
         self.port = port
         self.baud = baud
@@ -13,18 +12,18 @@ class koradUSBComm(object):
     def udpSendRecv(self, message):
         startTime = time.time()
         with serial.Serial(self.port, self.baud, timeout=self.timeout) as ser:
-            sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
-            sio.write(message + '\n')
-            sio.flush()
-            sOut = ser.readline()
+            # sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+            ser.write((message + '\n').encode('utf-8'))
+            ser.flush()
+            sOut = ser.readline().decode('utf-8').strip()
             ser.close
-            return sOut.decode('utf-8')
+            return sOut
 
     def udpSend(self, message):
         with serial.Serial(self.port, self.baud, timeout=self.timeout) as ser:
-            sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
-            sio.write(message + '\n')
-            sio.flush()
+            # sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
+            ser.write((message + '\n').encode('utf-8'))
+            ser.flush()
             ser.close
 
 class kel103(object):
@@ -132,20 +131,20 @@ class kel103(object):
         return
 
 
-# Import the kel103 class from kel103_usb
-from kel103_usb import kel103
+# # Import the kel103 class from kel103_usb
+# from kel103_usb import kel103
 
-# Create an instance of the kel103 class
-device = kel103("COM7", 115200)
+# # Create an instance of the kel103 class
+# device = kel103("COM7", 115200)
 
-# Check if the device is connected
-if device.checkDevice():
-    print("Device is connected: TENMA detected")
-    # Measure and print the voltage
-    voltage = device.measureVolt()
-    print(f"Measured Voltage: {voltage} V")
-else:
-    print("Device not connected: TENMA not detected")
+# # Check if the device is connected
+# if device.checkDevice():
+#     print("Device is connected: TENMA detected")
+#     # Measure and print the voltage
+#     voltage = device.measureVolt()
+#     print(f"Measured Voltage: {voltage} V")
+# else:
+#     print("Device not connected: TENMA not detected")
 
-# End communication
-device.endComm()
+# # End communication
+# device.endComm()
