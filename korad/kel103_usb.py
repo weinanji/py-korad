@@ -36,7 +36,7 @@ class kel103(object):
         return self.device.udpSendRecv('*IDN?')
     
     def checkDevice(self):
-        if 'KEL103' in self.deviceInfo():
+        if 'TENMA' in self.deviceInfo():
             return True
         else:
             return False
@@ -130,3 +130,22 @@ class kel103(object):
         
     def endComm(self):
         return
+
+
+# Import the kel103 class from kel103_usb
+from kel103_usb import kel103
+
+# Create an instance of the kel103 class
+device = kel103("COM7", 115200)
+
+# Check if the device is connected
+if device.checkDevice():
+    print("Device is connected: TENMA detected")
+    # Measure and print the voltage
+    voltage = device.measureVolt()
+    print(f"Measured Voltage: {voltage} V")
+else:
+    print("Device not connected: TENMA not detected")
+
+# End communication
+device.endComm()

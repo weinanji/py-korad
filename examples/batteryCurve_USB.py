@@ -11,12 +11,12 @@ import numpy as np
 from korad import kel103_usb
 
 #test proporties
-cutOffVoltage = 10
-dischargeRate = 3.5
+cutOffVoltage = 3
+dischargeRate = 0.45
 MISSED_LIMIT = 10 # amount of missed samples that is allowed
 
 # setup the device (the IP of your ethernet/wifi interface, the IP of the Korad device)
-kel = kel103_usb.kel103('COM5', 115200)
+kel = kel103_usb.kel103('COM7', 115200)
 kel.checkDevice()
 
 # a quick battery test
